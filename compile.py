@@ -5,11 +5,11 @@ import requests
 from jinja2 import Template
 
 
-def render(from_path, to_path, template):
+def render(dir_path, from_path, to_path, template):
     with open(from_path, "r") as f:
         s = f.read()
 
-    s = parse_image_links(s)
+    s = parse_image_links(dir_path, s)
     s = parse_github(s)
     s = parse_template(template, s)
 
@@ -18,21 +18,22 @@ def render(from_path, to_path, template):
 
 
 def walk_md_files():
-    for path, _, filenames in os.walk("./posts"):
+    for dir_path, _, filenames in os.walk("./posts"):
         for filename in filenames:
             if not filename.endswith(".md"):
                 continue
-            from_path = os.path.join(path, filename)
-            to_path = os.path.join(path, filename[: -len(".md")] + ".html")
-            yield from_path, to_path
+            from_path = os.path.join(dir_path, filename)
+            to_path = os.path.join(dir_path, filename[: -len(".md")] + ".html")
+            yield dir_path, from_path, to_path
 
 
-def parse_image_links(s):
-    return re.sub(
-        r"\!\[\]\(([^)]*?)\)",
-        r"![https://raw.githubusercontent.com/coreygirard/serverless-blog-content/master](\1)",
-        s,
-    )
+def parse_image_links(dir_path, s):
+    for img_name in os.listdir(os.path.join(dir_path, "images")):
+        s = s.replace(
+            f"![]({img_name})",
+            f"![{img_name}](https://raw.githubusercontent.com/coreygirard/serverless-blog-content/master/{dir_path[2:]}/{img_name})",
+        )
+    return s
 
 
 def parse_github(s):
@@ -49,5 +50,5 @@ if __name__ == "__main__":
     with open("./templates/post.html.jinja", "r") as f:
         template = Template(f.read())
 
-    for from_path, to_path in walk_md_files():
-        render(from_path, to_path, template)
+    for dir_path, from_path, to_path in walk_md_files():
+        render(dir_path, from_path, to_path, template)
