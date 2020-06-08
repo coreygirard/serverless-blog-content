@@ -41,7 +41,7 @@ def parse_image_links(dir_path, s):
             ]
         )
         s = s.replace(
-            f"![]({img_name})", f'<img src="{url}" width="200" height="200" />'
+            f"![]({img_name})", f'<img src="{url}" width="25%" max-height="auto" />'
         )
     return s
 
