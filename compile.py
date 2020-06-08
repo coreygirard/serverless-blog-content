@@ -29,10 +29,18 @@ def walk_md_files():
 
 def parse_image_links(dir_path, s):
     for img_name in os.listdir(os.path.join(dir_path, "images")):
-        s = s.replace(
-            f"![]({img_name})",
-            f"![{img_name}](https://raw.githubusercontent.com/coreygirard/serverless-blog-content/master/{dir_path[2:]}/{img_name})",
+        url = "/".join(
+            [
+                "https://raw.githubusercontent.com",
+                "coreygirard",
+                "serverless-blog-content",
+                "master",
+                dir_path[2:],  # remove initial "./"
+                "images",
+                img_name,
+            ]
         )
+        s = s.replace(f"![]({img_name})", f"![{img_name}]({url})")
     return s
 
 
